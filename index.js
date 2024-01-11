@@ -16,7 +16,7 @@ const stripe = Stripe(process.env.STRIPE_SECRET);
 mongoose.connect(process.env.MONGO_URL).then(() => console.log("db connected")).catch((err) => console.log(err));
 
 
-const endpointSecret = "whsec_4y7K9fwgtt8MbSYlmVF2gEs6YfIxzyLM";
+const endpointSecret = process.env.ENDPOINT_SECRET;
 
 
 
