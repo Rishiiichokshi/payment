@@ -49,18 +49,33 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
       console.log(`Request Body: ${JSON.stringify(request.body)}`);
       const checkoutData = event.data.object;
       console.log("Session Completed");
+
+      // Extract address information from the shipping object
+      const address = checkoutData.shipping.address;
+
       stripe.customers
-        .retrieve(checkoutData.customer)
+        .create({
+          name: 'test', // Update with actual customer name
+          description: 'test description',
+          email: checkoutData.customer_email,
+          source: checkoutData.payment_method,
+          address: {
+            city: address.city,
+            country: address.country,
+            line1: address.line1,
+            line2: address.line2,
+            postal_code: address.postal_code,
+            state: address.state,
+          },
+        })
         .then(async (customer) => {
           try {
             const data = JSON.parse(customer.metadata.cart);
 
-            const products = data.map((item) => {
-              return {
-                productId: item.id,
-                quantity: item.cartQuantity,
-              };
-            });
+            const products = data.map((item) => ({
+              productId: item.id,
+              quantity: item.cartQuantity,
+            }));
 
             console.log(products[0].supplier);
 
