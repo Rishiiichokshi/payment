@@ -28,20 +28,25 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
   try {
     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
+    console.log(`Webhook Error: ${err.message}`);
     response.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
- 
+
 
 
   // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
-       paymentIntentSucceeded = event.data.object;
+      console.log(`Received webhook event: ${event.type}`);
+      console.log(`Request Body: ${JSON.stringify(request.body)}`);
+      paymentIntentSucceeded = event.data.object;
       // console.log(paymentIntentSucceeded);
       break;
 
     case 'checkout.session.completed':
+      console.log(`Received webhook event: ${event.type}`);
+      console.log(`Request Body: ${JSON.stringify(request.body)}`);
       const checkoutData = event.data.object;
       console.log("Session Completed");
       stripe.customers
@@ -49,7 +54,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
         .then(async (customer) => {
           try {
             const data = JSON.parse(customer.metadata.cart);
-             
+
             const products = data.map((item) => {
               return {
                 productId: item.id,
@@ -58,14 +63,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
             });
 
             console.log(products[0].supplier);
-            
+
             const newOrder = new Order({
               userId: customer.metadata.userId,
               customerId: checkoutData.customer,
               productId: products[0].productId,
               quantity: products[0].quantity,
-              subtotal: checkoutData.amount_subtotal/100,
-              total: checkoutData.amount_total/100,
+              subtotal: checkoutData.amount_subtotal / 100,
+              total: checkoutData.amount_total / 100,
               payment_status: checkoutData.payment_status,
             });
 
