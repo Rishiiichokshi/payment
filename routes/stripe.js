@@ -63,7 +63,7 @@ router.post("/create-checkout-session", async (req, res) => {
     line_items,
     mode: "payment",
     customer: customer.id,
-    success_url: "https://payment-production-edde.up.railway.app/stripe/checkout-success",
+    success_url: "/stripe/checkout-success",
     cancel_url: "https://payment-production-edde.up.railway.app/stripe/cancel",
   });
 
